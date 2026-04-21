@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a472a">
+<title>🛒 Lista do Mercado</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #1a472a;
+    --verde-medio: #2d6a4f;
+    --verde-claro: #52b788;
+    --verde-suave: #b7e4c7;
+    --amarelo: #f9c74f;
+    --branco: #f8fdf9;
+    --cinza: #e8f5e9;
+    --texto: #1b2d22;
+    --riscado: #95a89b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--branco);
+    color: var(--texto);
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--verde) 0%, var(--verde-medio) 100%);
+    color: white;
+    padding: 20px 16px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(26,71,42,0.3);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+  }
+
+  header h1 span { font-size: 1.5rem; }
+
+  .progress-area { }
+
+  .progress-text {
+    font-size: 0.78rem;
+    font-weight: 700;
+    opacity: 0.9;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-bar-bg {
+    background: rgba(255,255,255,0.2);
+    border-radius: 50px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    background: var(--amarelo);
+    height: 100%;
+    border-radius: 50px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* SEARCH & ACTIONS */
+  .toolbar {
+    padding: 12px 16px 0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    padding: 10px 14px 10px 38px;
+    border: 2px solid var(--cinza);
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: white;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-wrap input:focus { border-color: var(--verde-claro); }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    pointer-events: none;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    white-space: nowrap;
+  }
+
+  .btn:active { transform: scale(0.95); }
+
+  .btn-verde {
+    background: var(--verde);
+    color: white;
+    box-shadow: 0 3px 10px rgba(26,71,42,0.25);
+  }
+
+  .btn-amarelo {
+    background: var(--amarelo);
+    color: var(--verde);
+    box-shadow: 0 3px 10px rgba(249,199,79,0.35);
+  }
+
+  .btn-danger {
+    background: #ffe0e0;
+    color: #c0392b;
+  }
+
+  /* FILTER TABS */
+  .filter-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .filter-tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 6px 14px;
+    border-radius: 50px;
+    border: 2px solid var(--cinza);
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    color: var(--riscado);
+  }
+
+  .tab.active {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: white;
+  }
+
+  /* LIST */
+  .list-container {
+    padding: 10px 16px 0;
+  }
+
+  .category-group { margin-bottom: 4px; }
+
+  .category-label {
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--verde-claro);
+    padding: 8px 2px 4px;
+  }
+
+  .item-card {
+    background: white;
+    border: 2px solid var(--cinza);
+    border-radius: 14px;
+    padding: 0;
+    margin-bottom: 7px;
+    overflow: hidden;
+    transition: all 0.25s ease;
+  }
+
+  .item-card.checked {
+    background: var(--cinza);
+    border-color: var(--verde-suave);
+    opacity: 0.75;
+  }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    padding: 13px 14px;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .check-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2.5px solid var(--verde-claro);
+    background: white;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .item-card.checked .check-circle {
+    background: var(--verde-claro);
+    border-color: var(--verde-claro);
+  }
+
+  .item-name {
+    flex: 1;
+    font-size: 0.97rem;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+
+  .item-card.checked .item-name {
+    text-decoration: line-through;
+    color: var(--riscado);
+  }
+
+  .item-qty {
+    font-size: 0.75rem;
+    font-weight: 800;
+    background: var(--verde-suave);
+    color: var(--verde-medio);
+    padding: 3px 9px;
+    border-radius: 50px;
+    flex-shrink: 0;
+  }
+
+  .item-actions {
+    display: flex;
+    border-top: 1px solid var(--cinza);
+    overflow: hidden;
+  }
+
+  .item-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .item-btn:active { background: var(--cinza); }
+
+  .item-btn.minus { color: #e74c3c; }
+  .item-btn.plus { color: var(--verde); border-left: 1px solid var(--cinza); border-right: 1px solid var(--cinza); }
+  .item-btn.del { color: #aaa; }
+
+  /* ADD ITEM FORM */
+  .add-section {
+    padding: 14px 16px 0;
+  }
+
+  .add-form {
+    background: white;
+    border: 2px dashed var(--verde-claro);
+    border-radius: 16px;
+    padding: 14px;
+    display: none;
+  }
+
+  .add-form.open { display: block; }
+
+  .add-form h3 {
+    font-size: 0.85rem;
+    font-weight: 900;
+    color: var(--verde);
+    margin-bottom: 10px;
+  }
+
+  .add-form input, .add-form select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--cinza);
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    outline: none;
+    background: var(--branco);
+  }
+
+  .add-form input:focus, .add-form select:focus {
+    border-color: var(--verde-claro);
+  }
+
+  .add-form-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .add-form-row input { flex: 1; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--riscado);
+    display: none;
+  }
+
+  .empty-state .emoji { font-size: 3rem; margin-bottom: 10px; }
+  .empty-state p { font-size: 0.9rem; font-weight: 700; }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    background: white;
+    border-top: 2px solid var(--cinza);
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.07);
+  }
+
+  .bottom-bar .btn { flex: 1; text-align: center; padding: 12px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--verde);
+    color: white;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* MODAL confirm */
+  .modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-bg.open { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 36px;
+    width: 100%;
+    max-width: 500px;
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal h3 { font-size: 1.1rem; font-weight: 900; margin-bottom: 8px; color: var(--verde); }
+  .modal p { font-size: 0.9rem; color: #666; margin-bottom: 20px; }
+  .modal-btns { display: flex; gap: 10px; }
+  .modal-btns .btn { flex: 1; padding: 14px; text-align: center; font-size: 0.95rem; }
+
+  @media (min-width: 480px) {
+    .list-container, .toolbar, .filter-tabs, .add-section, .bottom-bar { max-width: 480px; margin-left: auto; margin-right: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1><span>🛒</span> Lista do Mercado</h1>
+    <span id="headerCount" style="font-size:0.85rem;font-weight:800;opacity:0.85"></span>
+  </div>
+  <div class="progress-area">
+    <div class="progress-text">
+      <span id="progressLabel">Carregando...</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar item..." oninput="renderList()">
+  </div>
+  <button class="btn btn-verde" onclick="toggleAddForm()">＋ Adicionar</button>
+</div>
+
+<div class="filter-tabs">
+  <button class="tab active" onclick="setFilter('todos',this)">Todos</button>
+  <button class="tab" onclick="setFilter('pendentes',this)">⬜ Pendentes</button>
+  <button class="tab" onclick="setFilter('marcados',this)">✅ Marcados</button>
+</div>
+
+<div class="add-section">
+  <div class="add-form" id="addForm">
+    <h3>✏️ Novo Item</h3>
+    <input type="text" id="newItemName" placeholder="Nome do item (ex: Leite)" />
+    <div class="add-form-row">
+      <input type="number" id="newItemQty" placeholder="Qtd" min="1" value="1" style="max-width:90px">
+      <select id="newItemCat">
+        <option value="Mercearia">🥫 Mercearia</option>
+        <option value="Padaria">🍞 Padaria</option>
+        <option value="Laticínios">🧀 Laticínios</option>
+        <option value="Bebidas">🥤 Bebidas</option>
+        <option value="Hortifruti">🥦 Hortifruti</option>
+        <option value="Limpeza">🧹 Limpeza</option>
+        <option value="Higiene">🧴 Higiene</option>
+        <option value="Outros">📦 Outros</option>
+      </select>
+    </div>
+    <button class="btn btn-amarelo" style="width:100%;padding:12px;font-size:0.95rem" onclick="addItem()">Adicionar à Lista</button>
+  </div>
+</div>
+
+<div class="list-container" id="listContainer"></div>
+<div class="empty-state" id="emptyState">
+  <div class="emoji">🎉</div>
+  <p>Nenhum item encontrado!</p>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-amarelo" onclick="showResetModal()">🔄 Nova Compra</button>
+  <button class="btn btn-danger" onclick="showClearModal()">🗑️ Limpar Lista</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Modal Nova Compra -->
+<div class="modal-bg" id="resetModal">
+  <div class="modal">
+    <h3>🔄 Nova Compra</h3>
+    <p>Desmarcar todos os itens para começar uma nova compra? Os itens não serão removidos.</p>
+    <div class="modal-btns">
+      <button class="btn" style="background:#eee;color:#333" onclick="closeModal('resetModal')">Cancelar</button>
+      <button class="btn btn-amarelo" onclick="resetChecks()">Sim, desmarcar tudo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Limpar Lista -->
+<div class="modal-bg" id="clearModal">
+  <div class="modal">
+    <h3>🗑️ Limpar Lista</h3>
+    <p>Remover <strong>todos os itens marcados</strong> da lista permanentemente?</p>
+    <div class="modal-btns">
+      <button class="btn" style="background:#eee;color:#333" onclick="closeModal('clearModal')">Cancelar</button>
+      <button class="btn btn-danger" style="background:#e74c3c;color:white" onclick="clearChecked()">Remover marcados</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'lista_mercado_v2';
+
+const INITIAL_ITEMS = [
+  { name: 'Óleo', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Pão de Forma', qty: 3, cat: 'Padaria', checked: false },
+  { name: 'Miojo', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Chips', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Cream Cracker', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Biscoitos Doces', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Pão Hot Dog', qty: 1, cat: 'Padaria', checked: false },
+  { name: 'Arroz', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Açúcar', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Café', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Farofa', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Tapioca', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Filtro Dom Pedro', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Mandioca', qty: 1, cat: 'Hortifruti', checked: false },
+  { name: 'Batata', qty: 1, cat: 'Hortifruti', checked: false },
+  { name: 'Creme de Leite', qty: 1, cat: 'Laticínios', checked: false },
+  { name: 'Milho Verde', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Refri', qty: 1, cat: 'Bebidas', checked: false },
+  { name: 'Presunto / Muçarela', qty: 1, cat: 'Laticínios', checked: false },
+  { name: 'Bob', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Leite Fermentado Garrafa', qty: 1, cat: 'Laticínios', checked: false },
+  { name: 'Requeijão', qty: 1, cat: 'Laticínios', checked: false },
+  { name: 'Maionese Supreme', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Detergente', qty: 1, cat: 'Limpeza', checked: false },
+  { name: 'Amaciante', qty: 1, cat: 'Limpeza', checked: false },
+  { name: 'Omo', qty: 1, cat: 'Limpeza', checked: false },
+  { name: 'Sabonete', qty: 1, cat: 'Higiene', checked: false },
+  { name: 'Queijo Ralado', qty: 1, cat: 'Laticínios', checked: false },
+  { name: 'Pão Hambúrguer', qty: 1, cat: 'Padaria', checked: false },
+  { name: 'Macarrão', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Leite', qty: 4, cat: 'Laticínios', checked: false },
+  { name: 'Molho de Tomate', qty: 3, cat: 'Mercearia', checked: false },
+  { name: 'Maionese', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Papel Higiênico', qty: 1, cat: 'Higiene', checked: false },
+  { name: 'Sabão em Pó Comum', qty: 1, cat: 'Limpeza', checked: false },
+  { name: 'Salpet', qty: 1, cat: 'Limpeza', checked: false },
+  { name: 'Toddy', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Batata Palha', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'H2O', qty: 1, cat: 'Bebidas', checked: false },
+  { name: 'Palmito', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Veja', qty: 1, cat: 'Limpeza', checked: false },
+  { name: 'Bombril', qty: 1, cat: 'Limpeza', checked: false },
+  { name: 'Manteiga', qty: 1, cat: 'Laticínios', checked: false },
+  { name: 'Sazón', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Feijão', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Desinfetante', qty: 1, cat: 'Limpeza', checked: false },
+  { name: 'Catchup', qty: 1, cat: 'Mercearia', checked: false },
+  { name: 'Cloro', qty: 1, cat: 'Limpeza', checked: false },
+];
+
+const CAT_ICONS = {
+  'Mercearia': '🥫',
+  'Padaria': '🍞',
+  'Laticínios': '🧀',
+  'Bebidas': '🥤',
+  'Hortifruti': '🥦',
+  'Limpeza': '🧹',
+  'Higiene': '🧴',
+  'Outros': '📦',
+};
+
+let items = [];
+let filter = 'todos';
+
+function load() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try { items = JSON.parse(saved); } catch(e) { items = [...INITIAL_ITEMS]; }
+  } else {
+    items = INITIAL_ITEMS.map(i => ({...i, id: genId()}));
+  }
+  if (items.length && !items[0].id) {
+    items = items.map(i => ({...i, id: genId()}));
+  }
+  save();
+}
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+function genId() { return Math.random().toString(36).slice(2,10); }
+
+function setFilter(f, el) {
+  filter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderList();
+}
+
+function getFiltered() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  return items.filter(i => {
+    const matchSearch = !q || i.name.toLowerCase().includes(q);
+    const matchFilter = filter === 'todos' || (filter === 'pendentes' && !i.checked) || (filter === 'marcados' && i.checked);
+    return matchSearch && matchFilter;
+  });
+}
+
+function renderList() {
+  const filtered = getFiltered();
+  const container = document.getElementById('listContainer');
+  const empty = document.getElementById('emptyState');
+
+  updateProgress();
+
+  if (!filtered.length) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // group by category
+  const groups = {};
+  filtered.forEach(item => {
+    if (!groups[item.cat]) groups[item.cat] = [];
+    groups[item.cat].push(item);
+  });
+
+  // sort: unchecked categories first
+  const sortedCats = Object.keys(groups).sort((a, b) => {
+    const aChecked = groups[a].every(i => i.checked);
+    const bChecked = groups[b].every(i => i.checked);
+    if (aChecked && !bChecked) return 1;
+    if (!aChecked && bChecked) return -1;
+    return a.localeCompare(b);
+  });
+
+  container.innerHTML = sortedCats.map(cat => `
+    <div class="category-group">
+      <div class="category-label">${CAT_ICONS[cat] || '📦'} ${cat}</div>
+      ${groups[cat].map(item => itemCard(item)).join('')}
+    </div>
+  `).join('');
+}
+
+function itemCard(item) {
+  return `
+    <div class="item-card ${item.checked ? 'checked' : ''}" id="card-${item.id}">
+      <div class="item-row" onclick="toggleCheck('${item.id}')">
+        <div class="check-circle">${item.checked ? '✓' : ''}</div>
+        <div class="item-name">${item.name}</div>
+        ${item.qty > 1 ? `<div class="item-qty">x${item.qty}</div>` : ''}
+      </div>
+      <div class="item-actions">
+        <button class="item-btn minus" onclick="changeQty('${item.id}',-1)">− Qtd</button>
+        <button class="item-btn plus" onclick="changeQty('${item.id}',1)">+ Qtd</button>
+        <button class="item-btn del" onclick="deleteItem('${item.id}')">🗑️</button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleCheck(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  item.checked = !item.checked;
+  save();
+  renderList();
+  if (item.checked) showToast(`✅ ${item.name} marcado!`);
+}
+
+function changeQty(id, delta) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  item.qty = Math.max(1, (item.qty || 1) + delta);
+  save();
+  renderList();
+}
+
+function deleteItem(id) {
+  items = items.filter(i => i.id !== id);
+  save();
+  renderList();
+}
+
+function toggleAddForm() {
+  const form = document.getElementById('addForm');
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    setTimeout(() => document.getElementById('newItemName').focus(), 100);
+  }
+}
+
+function addItem() {
+  const name = document.getElementById('newItemName').value.trim();
+  if (!name) { showToast('⚠️ Digite o nome do item!'); return; }
+  const qty = parseInt(document.getElementById('newItemQty').value) || 1;
+  const cat = document.getElementById('newItemCat').value;
+  items.push({ id: genId(), name, qty, cat, checked: false });
+  save();
+  renderList();
+  document.getElementById('newItemName').value = '';
+  document.getElementById('newItemQty').value = '1';
+  showToast(`➕ ${name} adicionado!`);
+}
+
+function updateProgress() {
+  const total = items.length;
+  const done = items.filter(i => i.checked).length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressLabel').textContent = `${done} de ${total} itens`;
+  document.getElementById('headerCount').textContent = `${total - done} restante${total - done !== 1 ? 's' : ''}`;
+}
+
+function showResetModal() { document.getElementById('resetModal').classList.add('open'); }
+function showClearModal() { document.getElementById('clearModal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function resetChecks() {
+  items.forEach(i => i.checked = false);
+  save(); renderList();
+  closeModal('resetModal');
+  showToast('🔄 Lista desmarcada! Boa compra!');
+}
+
+function clearChecked() {
+  const count = items.filter(i => i.checked).length;
+  items = items.filter(i => !i.checked);
+  save(); renderList();
+  closeModal('clearModal');
+  showToast(`🗑️ ${count} item(s) removido(s)`);
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// Enter key on add form
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('addForm').classList.contains('open')) addItem();
+});
+
+// Close modal on background click
+document.querySelectorAll('.modal-bg').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+load();
+renderList();
+</script>
+</body>
+</html>
